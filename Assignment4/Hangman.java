@@ -12,11 +12,18 @@ import acm.util.*;
 import java.awt.*;
 
 public class Hangman extends ConsoleProgram {
+
+	/*Adds the canvas on the screen */
+	public void init() {
+		canvas = new HangmanCanvas ();
+		add(canvas);
+	}
 	
 
     public void run() {
     	
     	println ("Welcome to Hangman!");
+    	canvas.reset();
     	
     	/* get the word to be guessed */
     	hangmanWord = new HangmanLexicon ();
@@ -28,12 +35,31 @@ public class Hangman extends ConsoleProgram {
 		println (wordToGuess);
 		String userGuess = initializedString (wordToGuess);
 		
+		/*Display the empty word with dashes on the canvas */
+		canvas.displayWord(userGuess);
+		
 		/* Get the user guess as long as number of guesses is not 0 */
 		while (numberOfGuesses>0) {
 			println ("The word now looks like this: "+ userGuess);
 			println ("You have " + numberOfGuesses + " guesses left.");
+			
+			/* Ask the user to guess the character */
 			char guessedCharacter = getUserGuess();
+			
+			/* Compare against word to be guessed and fill in the guessed character */
 			userGuess = updateGuessedWord (wordToGuess, userGuess, guessedCharacter);
+			canvas.displayWord(userGuess);
+			
+			/* Handling correct and incorrect guesses */
+			if (!correctGuess) {
+				numberOfGuesses--;
+				canvas.noteIncorrectGuess(guessedCharacter);
+				println ("There are no "+ guessedCharacter + "'s in the word");
+			} else {
+				println ("Your guess is correct");
+			}
+			
+			/* Check if the user guessed the entire word */
 			if (checkForWin (userGuess)) {
 				println ("You won man!");
 				break;
@@ -100,7 +126,7 @@ public class Hangman extends ConsoleProgram {
 	
 	private String updateGuessedWord (String target, String str, char guessedChar) {
 		String result = "";
-		boolean correctGuess = false;
+		correctGuess = false;
 		for (int i=0; i<str.length(); i++) {
 			char ch = target.charAt(i);
 			if (ch != guessedChar) {
@@ -110,12 +136,6 @@ public class Hangman extends ConsoleProgram {
 				result += ch;
 				correctGuess = true;
 			}
-		}
-		if (!correctGuess) {
-			numberOfGuesses--;
-			println ("There are no "+ guessedChar + "'s in the word");
-		} else {
-			println ("Your guess is correct");
 		}
 		return result;
 	}	
@@ -137,6 +157,8 @@ public class Hangman extends ConsoleProgram {
     
     /* Private instance variables */
     private HangmanLexicon hangmanWord; /* The word to be guessed */
+    private HangmanCanvas canvas; /* Declares the instance variable for the canvas */
     private RandomGenerator rgen = RandomGenerator.getInstance (); /*Random generator */
-    int numberOfGuesses = NUMBER_GUESSES;
+    private int numberOfGuesses = NUMBER_GUESSES; /*Initializes to the number of guesses required */
+    private boolean correctGuess; /*Boolean variable to track correct guesses within the program */
 }
